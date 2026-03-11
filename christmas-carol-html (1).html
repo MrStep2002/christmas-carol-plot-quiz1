@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>A Christmas Carol – Plot Quiz</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    background: #f0e6d3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: Georgia, serif;
+    padding: 1rem;
+  }
+  #app {
+    background: #fff;
+    border-radius: 12px;
+    padding: 2rem;
+    max-width: 520px;
+    width: 100%;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+    border: 3px solid #8b1a1a;
+  }
+  .book-icon { text-align: center; font-size: 3rem; margin-bottom: 0.5rem; }
+  h1 { text-align: center; color: #8b1a1a; font-size: 1.7rem; margin-bottom: 0.2rem; }
+  .subtitle { text-align: center; color: #555; font-size: 1rem; margin-bottom: 1.2rem; font-style: italic; }
+  .rules-box { background: #fdf6ec; border: 1px solid #e0c89a; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; }
+  .rules-box p { margin: 0.3rem 0; font-size: 0.95rem; color: #333; }
+  .btn-primary {
+    display: block; width: 100%; padding: 0.9rem;
+    background: #8b1a1a; color: #fff; border: none;
+    border-radius: 8px; font-size: 1.1rem; cursor: pointer;
+    font-family: Georgia, serif; font-weight: bold;
+  }
+  .btn-primary:hover { background: #a02020; }
+  .header { display: flex; justify-content: space-between; margin-bottom: 0.7rem; }
+  .streak-badge { background: #8b1a1a; color: #fff; border-radius: 20px; padding: 0.3rem 0.8rem; font-size: 0.9rem; font-weight: bold; }
+  .best-badge { background: #f0e6d3; color: #8b1a1a; border-radius: 20px; padding: 0.3rem 0.8rem; font-size: 0.9rem; font-weight: bold; border: 1px solid #8b1a1a; }
+  .timer-track { height: 10px; background: #eee; border-radius: 5px; overflow: hidden; margin-bottom: 0.3rem; }
+  .timer-bar { height: 100%; border-radius: 5px; transition: width 1s linear, background 0.3s; }
+  .timer-label { text-align: center; font-size: 0.85rem; font-weight: bold; margin-bottom: 0.5rem; }
+  .q-meta { text-align: center; font-size: 0.8rem; color: #888; margin: 0.4rem 0 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .q-text { font-size: 1.1rem; color: #222; text-align: center; margin: 0 0 1.2rem; line-height: 1.5; }
+  .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+  .opt-btn {
+    padding: 0.75rem 0.5rem; border-radius: 8px; font-size: 0.95rem;
+    font-family: Georgia, serif; text-align: center; line-height: 1.3;
+    cursor: pointer; border: 2px solid #ccc; background: #fff; color: #222;
+  }
+  .opt-btn:disabled { cursor: default; }
+  .opt-btn.correct { background: #d4edda !important; border-color: #2d7a3a !important; color: #155724 !important; }
+  .opt-btn.wrong   { background: #f8d7da !important; border-color: #c0392b !important; color: #721c24 !important; }
+  .score-box { background: #fdf6ec; border: 1px solid #e0c89a; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+  .score-line { display: flex; justify-content: space-between; align-items: center; font-size: 1rem; color: #333; margin-bottom: 0.4rem; }
+  .score-big { font-size: 2rem; color: #b22222; font-weight: bold; }
+  .score-med { font-size: 1.4rem; color: #2d7a3a; font-weight: bold; }
+  .fail-msg { text-align: center; font-size: 1rem; color: #c0392b; margin: 0.3rem 0 0.5rem; }
+  .praise { text-align: center; font-style: italic; color: #555; font-size: 0.95rem; margin: 0 0 1rem; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+var ALL_QUESTIONS = [
+  { q:"What is Scrooge's first name?", options:["Ebenezer","Edward","Edmund","Ernest"], answer:"Ebenezer", type:"mc" },
+  { q:"Marley has been dead for exactly seven years at the start of the story.", answer:"true", type:"tf" },
+  { q:"What does Scrooge's nephew Fred invite him to?", options:["A ball","A Christmas dinner","A carol concert","A church service"], answer:"A Christmas dinner", type:"mc" },
+  { q:"Scrooge refuses to donate money to two portly gentlemen collecting for the poor.", answer:"true", type:"tf" },
+  { q:"What appears on Scrooge's door knocker?", options:["A skull","Marley's face","A ghost","A lion"], answer:"Marley's face", type:"mc" },
+  { q:"Marley's ghost is bound in chains made of cashboxes, keys, and ledgers.", answer:"true", type:"tf" },
+  { q:"How many spirits does Marley tell Scrooge will visit him?", options:["One","Two","Three","Four"], answer:"Three", type:"mc" },
+  { q:"Scrooge's business partner was named Bob Cratchit.", answer:"false", type:"tf" },
+  { q:"What does Scrooge pay his clerk Bob Cratchit?", options:["Five shillings a week","Fifteen shillings a week","A pound a week","Two pounds a week"], answer:"Fifteen shillings a week", type:"mc" },
+  { q:"Marley's ghost tells Scrooge the first spirit will arrive at one o'clock.", answer:"true", type:"tf" },
+  { q:"What does Scrooge say about people who say 'Merry Christmas'?", options:["They are fools","They should be buried with a stake of holly","They are kind","They should give him money"], answer:"They should be buried with a stake of holly", type:"mc" },
+  { q:"Scrooge sees a procession of tormented ghosts outside his window in Stave 1.", answer:"true", type:"tf" },
+  { q:"What does the Ghost of Christmas Past look like?", options:["A tall dark figure","A glowing child-like figure","An old man with a lantern","A woman in white"], answer:"A glowing child-like figure", type:"mc" },
+  { q:"The Ghost of Christmas Past shows Scrooge his happy childhood memories first.", answer:"false", type:"tf" },
+  { q:"Where did Scrooge go to school as a boy?", options:["London","A boarding school in the country","A workhouse","Cambridge"], answer:"A boarding school in the country", type:"mc" },
+  { q:"As a young boy, Scrooge was left alone at school during the holidays.", answer:"true", type:"tf" },
+  { q:"What is the name of Scrooge's sister who comes to bring him home from school?", options:["Belle","Fan","Clara","Grace"], answer:"Fan", type:"mc" },
+  { q:"Fan tells Scrooge that their father has become kinder.", answer:"true", type:"tf" },
+  { q:"What is the name of Scrooge's cheerful employer in his past?", options:["Fezziwig","Fuzziwig","Farnsworth","Fagin"], answer:"Fezziwig", type:"mc" },
+  { q:"Scrooge was once engaged to be married.", answer:"true", type:"tf" },
+  { q:"What reason does Belle give for breaking off her engagement to Scrooge?", options:["He was too poor","He loved money more than her","He was unfaithful","He moved away"], answer:"He loved money more than her", type:"mc" },
+  { q:"The Ghost shows Scrooge a vision of Belle's happy family life years later.", answer:"true", type:"tf" },
+  { q:"Scrooge extinguishes the Ghost of Christmas Past using its own cap.", answer:"true", type:"tf" },
+  { q:"The Ghost of Christmas Present sits on top of what in Scrooge's room?", options:["A pile of food","A throne of ice","A pile of coal","A bed of holly"], answer:"A pile of food", type:"mc" },
+  { q:"How many Ghosts of Christmas Present have there been before this one?", options:["Over 1,800","Twelve","Seven","None"], answer:"Over 1,800", type:"mc" },
+  { q:"The Ghost of Christmas Present sprinkles incense from his torch to spread goodwill.", answer:"true", type:"tf" },
+  { q:"What illness does Tiny Tim have?", options:["The novel never specifies","Tuberculosis","Rickets","Scarlet fever"], answer:"The novel never specifies", type:"mc" },
+  { q:"Bob Cratchit toasts Scrooge at the Cratchit family Christmas dinner.", answer:"true", type:"tf" },
+  { q:"What does Fred say is the use of Christmas?", options:["A time for charity","A kind, forgiving, charitable time","A time for family and fun","A religious occasion"], answer:"A kind, forgiving, charitable time", type:"mc" },
+  { q:"Fred's wife and friends speak very kindly about Scrooge.", answer:"false", type:"tf" },
+  { q:"The Ghost of Christmas Present reveals two hidden children under his robe. What are they called?", options:["Greed and Envy","Ignorance and Want","Poverty and Despair","Sorrow and Need"], answer:"Ignorance and Want", type:"mc" },
+  { q:"The Ghost of Christmas Present warns Scrooge to beware most of the boy called Ignorance.", answer:"true", type:"tf" },
+  { q:"The Ghost of Christmas Present visits miners, lighthouse keepers and sailors.", answer:"true", type:"tf" },
+  { q:"The Ghost of Christmas Yet to Come never speaks.", answer:"true", type:"tf" },
+  { q:"How does the Ghost of Christmas Yet to Come communicate with Scrooge?", options:["Through writing","Through pointing","Through images","Through another ghost"], answer:"Through pointing", type:"mc" },
+  { q:"Some businessmen joke about attending a dead man's funeral only if lunch is provided.", answer:"true", type:"tf" },
+  { q:"What do the charwoman, laundress and undertaker's man do with the dead man's belongings?", options:["Donate them to charity","Return them to his family","Sell them to Old Joe","Burn them"], answer:"Sell them to Old Joe", type:"mc" },
+  { q:"The dead man's bed curtains are stolen while his body still lies in the room.", answer:"true", type:"tf" },
+  { q:"Scrooge sees a couple who are relieved by someone's death because they owed him money.", answer:"true", type:"tf" },
+  { q:"The ghost shows Scrooge a tender scene of the Cratchit family mourning Tiny Tim.", answer:"true", type:"tf" },
+  { q:"Where does the Ghost of Christmas Yet to Come take Scrooge at the end of Stave 4?", options:["A graveyard","A workhouse","The Stock Exchange","A church"], answer:"A graveyard", type:"mc" },
+  { q:"Scrooge reads his own name on the gravestone.", answer:"true", type:"tf" },
+  { q:"Scrooge promises the ghost that he will change his ways.", answer:"true", type:"tf" },
+  { q:"What day does Scrooge wake up on after his visions?", options:["New Year's Day","Christmas Eve","Christmas Day","Boxing Day"], answer:"Christmas Day", type:"mc" },
+  { q:"Scrooge is filled with grief and sadness when he wakes on Christmas morning.", answer:"false", type:"tf" },
+  { q:"Scrooge sends an anonymous prize turkey to Bob Cratchit's family.", answer:"true", type:"tf" },
+  { q:"How does Scrooge send the turkey to the Cratchits?", options:["He carries it himself","He pays a boy to take it","He hires a cab","He asks Fred to deliver it"], answer:"He pays a boy to take it", type:"mc" },
+  { q:"Scrooge donates a large sum of money to the two charity collectors.", answer:"true", type:"tf" },
+  { q:"Scrooge attends his nephew Fred's Christmas dinner.", answer:"true", type:"tf" },
+  { q:"Scrooge surprises Bob Cratchit the next morning by arriving late himself.", answer:"false", type:"tf" },
+  { q:"What does Scrooge tell Bob Cratchit he intends to do?", options:["Dismiss him","Raise his salary","Move the office","Retire"], answer:"Raise his salary", type:"mc" },
+  { q:"Dickens says Scrooge became known as a good man who truly knew how to keep Christmas.", answer:"true", type:"tf" },
+  { q:"Tiny Tim does NOT die by the end of the story.", answer:"true", type:"tf" }
+];
+
+var TIME_LIMIT = 5;
+var questions = [], idx = 0, streak = 0, best = 0, timeLeft = TIME_LIMIT;
+var answered = false, timerInterval = null, failReason = "";
+
+function shuffle(arr) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+  }
+  return a;
+}
+
+function stopTimer() { clearInterval(timerInterval); timerInterval = null; }
+
+function timerColor(t) {
+  return t > 3 ? "#2d7a3a" : t > 1 ? "#c97a00" : "#c0392b";
+}
+
+function showStart() {
+  document.getElementById("app").innerHTML =
+    '<div class="book-icon">📖</div>' +
+    '<h1>A Christmas Carol</h1>' +
+    '<p class="subtitle">Plot Knowledge Quiz</p>' +
+    '<div class="rules-box">' +
+      '<p>⏱ <strong>5 seconds</strong> to answer each question</p>' +
+      '<p>✅ Keep going until you get one <strong>wrong</strong></p>' +
+      '<p>🎯 Build the longest <strong>streak</strong> you can!</p>' +
+      '<p>🔀 Questions are chosen <strong>at random</strong></p>' +
+    '</div>' +
+    '<button class="btn-primary" id="startBtn">Start Quiz</button>';
+  document.getElementById("startBtn").addEventListener("click", startGame);
+}
+
+function showGameOver() {
+  var emoji = streak === 0 ? "😬" : streak < 10 ? "🙂" : streak < 20 ? "😄" : "🏆";
+  var failMsg = failReason === "timeout" ? "⏰ Time ran out!" : "❌ Wrong answer!";
+  var praise = streak >= 40 ? "Outstanding! Dickens himself would be proud!"
+    : streak >= 25 ? "Excellent work — you really know this novel!"
+    : streak >= 15 ? "Great effort — a solid understanding of the plot!"
+    : streak >= 5  ? "Good start — can you beat your score?" : "";
+  document.getElementById("app").innerHTML =
+    '<div class="book-icon">' + emoji + '</div>' +
+    '<h1>Game Over!</h1>' +
+    '<p class="fail-msg">' + failMsg + '</p>' +
+    '<div class="score-box">' +
+      '<div class="score-line"><span>Your streak</span><span class="score-big">' + streak + '</span></div>' +
+      '<div class="score-line"><span>Best ever</span><span class="score-med">' + best + '</span></div>' +
+    '</div>' +
+    (praise ? '<p class="praise">' + praise + '</p>' : '') +
+    '<button class="btn-primary" id="retryBtn">Try Again</button>';
+  document.getElementById("retryBtn").addEventListener("click", startGame);
+}
+
+function showQuestion() {
+  var q = questions[idx];
+  var isTF = q.type === "tf";
+  var options = isTF ? ["true", "false"] : q.options;
+  var col = timerColor(timeLeft);
+  var pct = (timeLeft / TIME_LIMIT * 100);
+
+  var btns = "";
+  for (var i = 0; i < options.length; i++) {
+    var label = isTF ? (options[i] === "true" ? "True" : "False") : options[i];
+    btns += '<button class="opt-btn" data-idx="' + i + '">' + label + '</button>';
+  }
+
+  document.getElementById("app").innerHTML =
+    '<div class="header">' +
+      '<span class="streak-badge">🔥 Streak: ' + streak + '</span>' +
+      '<span class="best-badge">Best: ' + best + '</span>' +
+    '</div>' +
+    '<div class="timer-track"><div class="timer-bar" id="tbar" style="width:' + pct + '%;background:' + col + '"></div></div>' +
+    '<div class="timer-label" id="tlabel" style="color:' + col + '">' + timeLeft + 's</div>' +
+    '<p class="q-meta">Q' + (idx + 1) + ' · ' + (isTF ? "True or False" : "Multiple Choice") + '</p>' +
+    '<p class="q-text">' + q.q + '</p>' +
+    '<div class="options-grid">' + btns + '</div>';
+
+  // Attach click handlers via JS, not inline onclick
+  var btnEls = document.querySelectorAll(".opt-btn");
+  for (var j = 0; j < btnEls.length; j++) {
+    (function(btn, optVal) {
+      btn.addEventListener("click", function() { handleAnswer(optVal); });
+    })(btnEls[j], options[j]);
+  }
+}
+
+function updateTimerDisplay() {
+  var bar = document.getElementById("tbar");
+  var lbl = document.getElementById("tlabel");
+  if (!bar || !lbl) return;
+  var col = timerColor(timeLeft);
+  bar.style.width = (timeLeft / TIME_LIMIT * 100) + "%";
+  bar.style.background = col;
+  lbl.style.color = col;
+  lbl.textContent = timeLeft + "s";
+}
+
+function startTimer() {
+  stopTimer();
+  timerInterval = setInterval(function() {
+    timeLeft--;
+    updateTimerDisplay();
+    if (timeLeft <= 0) {
+      stopTimer();
+      if (!answered) {
+        answered = true;
+        failReason = "timeout";
+        // highlight correct answer
+        var q = questions[idx];
+        var isTF = q.type === "tf";
+        var options = isTF ? ["true","false"] : q.options;
+        var btnEls = document.querySelectorAll(".opt-btn");
+        for (var i = 0; i < btnEls.length; i++) {
+          btnEls[i].disabled = true;
+          if (options[i] === q.answer) btnEls[i].classList.add("correct");
+        }
+        setTimeout(function() { best = Math.max(best, streak); showGameOver(); }, 900);
+      }
+    }
+  }, 1000);
+}
+
+function handleAnswer(val) {
+  if (answered) return;
+  answered = true;
+  stopTimer();
+  var q = questions[idx];
+  var isTF = q.type === "tf";
+  var options = isTF ? ["true","false"] : q.options;
+  var correct = val === q.answer;
+  var btnEls = document.querySelectorAll(".opt-btn");
+  for (var i = 0; i < btnEls.length; i++) {
+    btnEls[i].disabled = true;
+    if (options[i] === q.answer) btnEls[i].classList.add("correct");
+    else if (options[i] === val && !correct) btnEls[i].classList.add("wrong");
+  }
+  if (correct) {
+    streak++;
+    setTimeout(function() {
+      idx++;
+      answered = false;
+      timeLeft = TIME_LIMIT;
+      showQuestion();
+      startTimer();
+    }, 700);
+  } else {
+    failReason = "wrong";
+    setTimeout(function() { best = Math.max(best, streak); showGameOver(); }, 1000);
+  }
+}
+
+function startGame() {
+  stopTimer();
+  questions = shuffle(ALL_QUESTIONS);
+  idx = 0; streak = 0; answered = false;
+  timeLeft = TIME_LIMIT; failReason = "";
+  showQuestion();
+  startTimer();
+}
+
+showStart();
+</script>
+</body>
+</html>
