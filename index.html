@@ -261,9 +261,9 @@ function handleAnswer(val) {
     streak++;
     setTimeout(function() {
       idx++;
-      answered = false;
       timeLeft = TIME_LIMIT;
       showQuestion();
+      answered = false;
       startTimer();
     }, 700);
   } else {
